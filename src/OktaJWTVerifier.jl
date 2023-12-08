@@ -1,4 +1,4 @@
-module Example
+module OktaJWTVerifier
 export hello, domath
 
 """
