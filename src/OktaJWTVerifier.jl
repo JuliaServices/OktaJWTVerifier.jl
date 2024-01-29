@@ -6,6 +6,14 @@ export Verifier, verify_access_token!, verify_id_token!
 
 const regx = r"[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.?([a-zA-Z0-9-_]+)[/a-zA-Z0-9-_]+?$"
 
+function jsonparse(bytes)
+    try
+        return JSON.parse(String(bytes))
+    catch
+        throw(ArgumentError("failed to parse JSON"))
+    end
+end
+
 struct Verifier
     issuer::String
     claims_to_validate::Dict{String, String}
@@ -61,7 +69,7 @@ function fetch_metadata(url::String)
     catch
         throw(ArgumentError("Request for metadata $url was not HTTP 2xx OK"))
     end
-    return JSON.parse(resp.body)
+    return jsonparse(resp.body)
 end
 
 function get_metadata(j::Verifier)
@@ -189,7 +197,7 @@ function is_valid_jwt(jwt::String)
     jwt == "" && throw(ArgumentError("token is empty"))
     match(regx, jwt) !== nothing || throw(ArgumentError("token is not valid: $jwt"))
     parts = split(jwt, ".")
-    header = JSON.parse(base64decode(padheader(String(parts[1]))))
+    header = jsonparse(base64decode(padheader(String(parts[1]))))
     haskey(header, "alg") || throw(ArgumentError("the tokens header must contain an 'alg'"))
     haskey(header, "kid") || throw(ArgumentError("the tokens header must contain a 'kid'"))
     header["alg"] == "RS256" || throw(ArgumentError("the tokens alg must be 'RS256'"))
