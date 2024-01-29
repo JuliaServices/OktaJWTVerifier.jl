@@ -1,6 +1,6 @@
 module OktaJWTVerifier
 
-using Base64, HTTP, JSONBase, Dates, JWTs, ExpiringCaches
+using Base64, HTTP, JSON, Dates, JWTs, ExpiringCaches
 
 export Verifier, verify_access_token!, verify_id_token!
 
@@ -61,7 +61,7 @@ function fetch_metadata(url::String)
     catch
         throw(ArgumentError("Request for metadata $url was not HTTP 2xx OK"))
     end
-    return JSONBase.parse(resp.body)
+    return JSON.parse(resp.body)
 end
 
 function get_metadata(j::Verifier)
@@ -189,7 +189,7 @@ function is_valid_jwt(jwt::String)
     jwt == "" && throw(ArgumentError("token is empty"))
     match(regx, jwt) !== nothing || throw(ArgumentError("token is not valid: $jwt"))
     parts = split(jwt, ".")
-    header = JSONBase.parse(base64decode(padheader(String(parts[1]))))
+    header = JSON.parse(base64decode(padheader(String(parts[1]))))
     haskey(header, "alg") || throw(ArgumentError("the tokens header must contain an 'alg'"))
     haskey(header, "kid") || throw(ArgumentError("the tokens header must contain a 'kid'"))
     header["alg"] == "RS256" || throw(ArgumentError("the tokens alg must be 'RS256'"))
