@@ -8,6 +8,8 @@ GitHub Actions : [![Build Status](https://github.com/JuliaServices/OktaJWTVerifi
 
 ## Usage
 
+Usage is simple in that you first create a `Verifier` instance and then use that to verify tokens, access or id.
+
 ```julia
 using OktaJWTVerifier
 v = OktaJWTVerifier.Verifier("https://myoktadomain.okta.com/oauth2/default"; claims_to_validate=Dict("aud" => "myoktaaudience"))
