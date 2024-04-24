@@ -48,7 +48,7 @@ See [`verify_access_token!`](@ref) and [`verify_id_token!`](@ref) for more detai
 function Verifier(issuer::String;
     claims_to_validate::Dict{String, String} = Dict{String, String}(),
     timeout::Dates.Minute = Dates.Minute(5),
-    discovery_well_known_url::String = "/.well-known/openid-configuration",
+    discovery_well_known_url::String = ".well-known/openid-configuration",
     cache::Cache = Cache{String, Any}(timeout),
     metadata_cache::Cache = Cache{String, Any}(timeout),
     leeway::Int64 = 120,
@@ -74,6 +74,7 @@ end
 
 function get_metadata(j::Verifier)
     metadata_url = joinpath(j.issuer, j.discovery_well_known_url)
+    @show j.issuer, metadata_url
     return get!(j.metadata_cache, metadata_url) do
         fetch_metadata(metadata_url)
     end
@@ -114,7 +115,7 @@ function verify_access_token!(j::Verifier, jwt::String)
 
     validate_iss!(j, myJwt.claims["iss"])
     validate_audience!(j, myJwt.claims["aud"])
-    validate_client_id!(j, myJwt.claims["cid"])
+    haskey(myJwt.claims, "cid") && validate_client_id!(j, myJwt.claims["cid"])
     validate_exp!(j, myJwt.claims["exp"])
     validate_iat!(j, myJwt.claims["iat"])
     return myJwt
@@ -150,10 +151,10 @@ function validate_nonce!(j::Verifier, nonce::String)
     end
 end
 
-function validate_audience!(j::Verifier, aud::Union{String, Vector{String}, Dict})
+function validate_audience!(j::Verifier, aud::Union{String, Vector, Dict})
     if aud isa String
         aud == j.claims_to_validate["aud"] || throw(ArgumentError("audience does not match"))
-    elseif aud isa Vector{String}
+    elseif aud isa Vector
         any(==(j.claims_to_validate["aud"]), aud) || throw(ArgumentError("audience does not match"))
     elseif aud isa Dict
         any(==(j.claims_to_validate["aud"]), values(aud)) || throw(ArgumentError("audience does not match"))
@@ -167,7 +168,7 @@ function validate_client_id!(j::Verifier, cid::String)
         v = j.claims_to_validate["cid"]
         if v isa String
             v == cid || throw(ArgumentError("client id does not match"))
-        elseif v isa Vector{String}
+        elseif v isa Vector
             any(==(cid), v) || throw(ArgumentError("client id does not match"))
         else
             throw(ArgumentError("unknown client id type"))
