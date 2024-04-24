@@ -73,7 +73,7 @@ function fetch_metadata(url::String)
 end
 
 function get_metadata(j::Verifier)
-    metadata_url = j.issuer * j.discovery_well_known_url
+    metadata_url = joinpath(j.issuer, j.discovery_well_known_url)
     return get!(j.metadata_cache, metadata_url) do
         fetch_metadata(metadata_url)
     end
