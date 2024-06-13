@@ -14,6 +14,7 @@ LibAwsCommon = "c6e421ba-b5f8-4792-a1c4-42948de3ed9d"
 LibAwsCompression = "51c8708f-2dd9-446d-a0d4-ba9f49ba4b23"
 LibAwsHTTP = "ce851869-0d7a-41e7-95ef-2d4cb63876dd"
 LibAwsIO = "a5388770-19df-4151-b103-3d71de896ddf"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [compat]
 ExpiringCaches = "1"

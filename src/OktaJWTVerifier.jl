@@ -1,6 +1,6 @@
 module OktaJWTVerifier
 
-using Base64, HTTP2, JSON, Dates, JWTs, ExpiringCaches
+using Base64, HTTP2, JSON, Dates, JWTs, ExpiringCaches, Logging
 
 export Verifier, verify_access_token!, verify_id_token!
 
@@ -66,7 +66,8 @@ function fetch_metadata(url::String)
     local resp
     try
         resp = HTTP2.get(url)
-    catch
+    catch e
+        @error "failed to fetch metadata" exception=e
         throw(ArgumentError("Request for metadata $url was not HTTP2 2xx OK"))
     end
     return jsonparse(resp.body)
