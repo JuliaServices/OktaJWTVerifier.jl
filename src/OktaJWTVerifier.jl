@@ -67,7 +67,7 @@ function fetch_metadata(url::String)
     try
         resp = HTTP2.get(url)
     catch e
-        @error "failed to fetch metadata" exception=e
+        @error "failed to fetch metadata" exception=(e, Base.catch_stack())
         throw(ArgumentError("Request for metadata $url was not HTTP2 2xx OK"))
     end
     return jsonparse(resp.body)
