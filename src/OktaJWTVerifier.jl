@@ -1,6 +1,6 @@
 module OktaJWTVerifier
 
-using Base64, HTTP, JSON, Dates, JWTs, ExpiringCaches
+using Base64, HTTP, JSON, Dates, JWTs, ExpiringCaches, Logging
 
 export Verifier, verify_access_token!, verify_id_token!
 
@@ -66,7 +66,8 @@ function fetch_metadata(url::String)
     local resp
     try
         resp = HTTP.get(url)
-    catch
+    catch e
+        @error "failed to fetch metadata" exception=(e, catch_backtrace())
         throw(ArgumentError("Request for metadata $url was not HTTP 2xx OK"))
     end
     return jsonparse(resp.body)
@@ -79,10 +80,12 @@ function get_metadata(j::Verifier)
     end
 end
 
+const DOWNLOADER = Ref{Any}(nothing)
+
 function decode(v::Verifier, jwt::String, jwkuri::String)
     jwkset = get!(v.jwkset_cache, jwkuri) do
         jks = JWKSet(jwkuri)
-        refresh!(jks)
+        refresh!(jks; downloader=DOWNLOADER[])
         return jks
     end
     token = JWT(; jwt)
