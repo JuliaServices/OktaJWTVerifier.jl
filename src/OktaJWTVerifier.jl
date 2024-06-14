@@ -80,10 +80,12 @@ function get_metadata(j::Verifier)
     end
 end
 
+const DOWNLOADER = Ref{Any}(nothing)
+
 function decode(v::Verifier, jwt::String, jwkuri::String)
     jwkset = get!(v.jwkset_cache, jwkuri) do
         jks = JWKSet(jwkuri)
-        refresh!(jks)
+        refresh!(jks; downloader=DOWNLOADER[])
         return jks
     end
     token = JWT(; jwt)
