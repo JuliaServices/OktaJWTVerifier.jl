@@ -1,6 +1,6 @@
 name = "OktaJWTVerifier"
 uuid = "4bff0fe4-4ead-499c-9e50-e12c47db005b"
-version = "1.1"
+version = "1.1.0"
 
 [deps]
 Base64 = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -9,13 +9,14 @@ ExpiringCaches = "bd5c46ae-da38-4b10-bcdd-5005402f2c4f"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 JWTs = "d850fbd6-035d-5a70-a269-1ca2e636ac6c"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [compat]
-julia = "1.6"
 ExpiringCaches = "1"
 HTTP = "1"
 JSON = "0.21"
 JWTs = "0.2.5"
+julia = "1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
