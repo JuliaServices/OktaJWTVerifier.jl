@@ -1,6 +1,6 @@
 module OktaJWTVerifier
 
-using Base64, HTTP, JSON, Dates, JWTs, ExpiringCaches, Logging
+using Base64, Downloads, JSON, Dates, JWTs, ExpiringCaches, Logging
 
 export Verifier, verify_access_token!, verify_id_token!
 
@@ -63,9 +63,11 @@ end
 
 # http get to metadata url to get the jwks_uri
 function fetch_metadata(url::String)
-    local resp
+    local body
     try
-        resp = HTTP.get(url)
+        output = PipeBuffer()
+        Downloads.request(url; method="GET", output=output, downloader=DOWNLOADER[])
+        body = take!(output)
     catch e
         @error "failed to fetch metadata" exception=(e, catch_backtrace())
         throw(ArgumentError("Request for metadata $url was not HTTP 2xx OK"))
