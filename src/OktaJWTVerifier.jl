@@ -72,7 +72,7 @@ function fetch_metadata(url::String)
         @error "failed to fetch metadata" exception=(e, catch_backtrace())
         throw(ArgumentError("Request for metadata $url was not HTTP 2xx OK"))
     end
-    return jsonparse(resp.body)
+    return jsonparse(body)
 end
 
 function get_metadata(j::Verifier)
