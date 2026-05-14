@@ -1,4 +1,28 @@
-using Test, Dates, OktaJWTVerifier
+using Test, Dates, OktaJWTVerifier, HTTP
+
+function with_metadata_server(f)
+    body = """{"jwks_uri":"https://example.com/keys"}"""
+    server, port = start_metadata_server(body)
+    try
+        return f("http://127.0.0.1:$port/.well-known/openid-configuration")
+    finally
+        close(server)
+    end
+end
+
+function start_metadata_server(body::String)
+    base_port = 20_000 + Int(mod(time_ns(), 30_000))
+    for offset in 0:20
+        port = 20_000 + Int(mod(base_port + offset, 30_000))
+        try
+            server = HTTP.serve!(Returns(HTTP.Response(200, body)), "127.0.0.1", port; verbose=false)
+            return server, port
+        catch e
+            e isa Base.IOError || rethrow()
+        end
+    end
+    error("failed to bind metadata test server")
+end
 
 @testset "OktaJWTVerifier" begin
     # validate issuer
@@ -40,4 +64,7 @@ using Test, Dates, OktaJWTVerifier
     @test_throws ArgumentError OktaJWTVerifier.verify_access_token!(v, "ew0KICAia2lkIjogImFiYzEyMyIsDQogICJhbmQiOiAidGhpcyINCn0.aa.aa")
     @test_throws ArgumentError OktaJWTVerifier.verify_access_token!(v, "ew0KICAiYWxnIjogIlJTMjU2IiwNCiAgImFuZCI6ICJ0aGlzIg0KfQ.aa.aa")
     @test_throws ArgumentError OktaJWTVerifier.verify_access_token!(v, "ew0KICAia2lkIjogImFiYzEyMyIsDQogICJhbGciOiAiSFMyNTYiDQp9.aa.aa")
+    with_metadata_server() do url
+        @test OktaJWTVerifier.fetch_metadata(url)["jwks_uri"] == "https://example.com/keys"
+    end
 end
